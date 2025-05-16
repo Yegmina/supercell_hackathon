@@ -1,5 +1,6 @@
 using UnityEngine;
 
+
 public class CatController : MonoBehaviour
 {
     public float cameraLag;
@@ -16,6 +17,12 @@ public class CatController : MonoBehaviour
     public new Camera camera;
 
     public CharacterController character;
+
+    public float jumpHeight = 2f;
+    public float upGravity = 9.8f;
+    public float downGravity = 14.8f;
+
+    float verticalVelocity = 0;
 
     void Start()
     {
@@ -34,17 +41,31 @@ public class CatController : MonoBehaviour
         var orbit = Input.GetAxis("Mouse X");
         cameraPivot.Rotate(Vector3.up, orbit * orbitSpeed * Time.deltaTime);
 
-        var forward = Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up).normalized;
-        var right = Vector3.ProjectOnPlane(camera.transform.right, Vector3.up).normalized;
+        var forward = Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up);
+        var right = Vector3.ProjectOnPlane(camera.transform.right, Vector3.up);
 
         var ws = Input.GetAxis("Vertical");
         var ad = Input.GetAxis("Horizontal");
 
-        var wish = (forward * ws + right * ad).normalized;
+        var wish = (forward * ws + right * ad).normalized * Mathf.Clamp01(Mathf.Sqrt(ws * ws + ad * ad));
         var motion = wish * speed;
         character.Move(motion * Time.deltaTime);
 
         cameraPivot.transform.position = Vector3.Lerp(cameraPivot.transform.position, character.transform.position, 1 - cameraLag);
+
+        if (Input.GetButtonDown("Jump")) {
+            verticalVelocity = Mathf.Sqrt(2 * upGravity * jumpHeight);
+        }
+
+        if (!character.isGrounded)
+        {
+            if (verticalVelocity > 0)
+                verticalVelocity -= Time.deltaTime * upGravity;
+            else
+                verticalVelocity -= Time.deltaTime * downGravity;
+        }
+
+        character.Move(Vector3.up * verticalVelocity * Time.deltaTime);
 
         if (wish.magnitude > 0.1)
         {
