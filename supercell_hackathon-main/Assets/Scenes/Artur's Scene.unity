@@ -311,7 +311,6 @@ GameObject:
   - component: {fileID: 146171828}
   - component: {fileID: 146171829}
   - component: {fileID: 146171830}
-  - component: {fileID: 146171832}
   - component: {fileID: 146171831}
   m_Layer: 0
   m_Name: Witch
@@ -388,28 +387,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   serviceUrl: http://127.0.0.1:5000/api/anim/witch-idle
   queryInterval: 5
---- !u!95 &146171832
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 146171827}
-  m_Enabled: 1
-  m_Avatar: {fileID: 9000000, guid: 98a56ff2c8ee98645a4d3f79fa1506c5, type: 3}
-  m_Controller: {fileID: 9100000, guid: 1820e4fd9aada5945bb132cff5237865, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
+  animator: {fileID: 1339369520}
+  controller: {fileID: 146171829}
 --- !u!1 &152754556
 GameObject:
   m_ObjectHideFlags: 0
