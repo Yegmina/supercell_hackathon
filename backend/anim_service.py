@@ -7,21 +7,13 @@ import time
 import logging
 
 from utils.gemini import GeminiModel
-from events import EVENTS  # import global events
+from events import EVENTS, events_bp
+from states import STATES, states_bp
 
-# Configure module-level logger
+# Configure module-level logger for animation service
 debug_logger = logging.getLogger("anim_service")
 debug_logger.setLevel(logging.DEBUG)
 
-# 1) Hard-coded list of recent events (for prototyping)
-_EVENTS = [
-    "cat stands and moves near X",
-    "cat looks at X",
-    "cat passed X",
-    "cat made a sound X",
-    "cat sat down",
-    "IMPORTANT: cat say MIAAAAAAAAYYYYYYYYYYYY"
-]
 
 # 2) Available animations
 ANIMATIONS = [
@@ -110,30 +102,31 @@ ANIMATIONS = [
     "A_POLY_IDL_WeightShift_R_Femn",
     "A_POLY_IDL_Yawn_Femn"
 ]
-# Instantiate Gemini client once
+# Instantiate Gemini client
 gemini = GeminiModel()
 
 # Blueprint for animation endpoints
 anim_bp = Blueprint("anim_service", __name__)
 
-
 @anim_bp.route("/api/anim/witch-idle", methods=["GET"])
 def choose_witch_idle_animation():
-    """
-    1) Sends EVENTS to Gemini (high-temp) for ranking
-    2) Sends that raw ranking back to Gemini (low-temp) for strict JSON
-    3) Parses & validates the names, retries if necessary
-    4) Randomly selects one by weight and returns it
-    """
+    # Print current events and states for debugging
+    debug_logger.debug(f"EVENTS: {EVENTS}")
+    debug_logger.debug(f"STATES: {STATES}")
+
     # 1) high-temp ranking prompt
     high_prompt = f"""
 You are an animation director. Here are the recent events:
 {chr(10).join(f"- {e}" for e in EVENTS)}
 
+Here are the current states:
+{chr(10).join(f"- {s}" for s in STATES)}
+
 Available animations:
 {chr(10).join(f"- {a}" for a in ANIMATIONS)}
 
-Your goal is to always choose the 3 most fitting animations from the list — even if the events are abstract. Never say 'none apply'. Always give 3 animations and assign percentages summing to 100.
+Your goal is to always choose the 3 most fitting animations from the list — even if the events and states are abstract. Never say 'none apply'.
+Always give 3 animations and assign percentages summing to 100.
 Respond in plain text like:
 A=40%, B=30%, C=30%
 """
@@ -153,7 +146,7 @@ Here is the raw ranking:
 Return STRICT JSON ONLY, keys matching animation names and integer values (no '%'): e.g.
 {{
   "A_POLY_IDL_ArmsFolded_Casual_Loop_Femn": 40,
-  "A_POLY_IDL_Look_Down_Femn": 30,
+  "A_POLY_IDL_Yawn_Femn": 30,
   "A_POLY_IDL_Yawn_Femn": 30
 }}
 If you can't match exactly, respond ERROR.
@@ -166,13 +159,14 @@ If you can't match exactly, respond ERROR.
         try:
             low_resp = gemini.call_model(low_prompt, system_prompt=None, check_malicious_input=False).strip()
             last_low_raw = low_resp
-            # strip fences
             cleaned = "\n".join(line for line in low_resp.splitlines() if not line.strip().startswith("```"))
             debug_logger.debug("Low-temp cleaned (attempt %d): %s", attempt+1, cleaned)
             parsed = json.loads(cleaned)
-            if (isinstance(parsed, dict)
+            if (
+                isinstance(parsed, dict)
                 and set(parsed.keys()).issubset(set(ANIMATIONS))
-                and all(isinstance(v, int) and v > 0 for v in parsed.values())):
+                and all(isinstance(v, int) and v > 0 for v in parsed.values())
+            ):
                 break
             parsed = None
         except json.JSONDecodeError:
@@ -191,8 +185,9 @@ If you can't match exactly, respond ERROR.
     names = list(parsed.keys())
     weights = [parsed[n] for n in names]
     chosen = random.choices(names, weights=weights, k=1)[0]
-    debug_logger.debug("Chosen animation: %s", chosen)
+    debug_logger.debug(f"Chosen animation: {chosen} ; Candidates: {parsed}")
+
+    # Print result to console
+    debug_logger.info(f"Returning animation: {chosen}")
 
     return jsonify({"animation": chosen, "all_candidates": parsed}), 200
-
-
