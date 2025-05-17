@@ -364,6 +364,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dc2a5548ef4cf44f9d2c7ebccf312e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  controller: {fileID: 1463749278}
   witch: {fileID: 146171829}
   network: {fileID: 1225890110}
   firstDoorTrigger: door
@@ -1279,6 +1280,17 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1463749278 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3776198294864211230, guid: 06e2d6d24a0ef3d4aaf12723f95ea1c8, type: 3}
+  m_PrefabInstance: {fileID: 5962576675370130999}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1463749268}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 603c9c62cdf642348acf1d3fa35ff529, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1570074079
 GameObject:
   m_ObjectHideFlags: 0
