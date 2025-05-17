@@ -20,6 +20,7 @@ public class PathNetwork : MonoBehaviour
     [SerializeField]
     public List<Edge> edges;
     public Dictionary<string, GameObject> children = new Dictionary<string, GameObject>();
+    public Dictionary<string, string> associatedNodeNames = new Dictionary<string, string>();
 
     void Start()
     {

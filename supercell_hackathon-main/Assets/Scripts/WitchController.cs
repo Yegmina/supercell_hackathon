@@ -62,4 +62,10 @@ public class WitchController : MonoBehaviour
             }
         }
     }
+
+    public void ForceMoveTo(string node)
+    {
+        state = State.Walking;
+        currentNode = network.children[node].name;
+    }
 }
