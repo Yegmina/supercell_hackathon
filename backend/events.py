@@ -1,0 +1,44 @@
+# events.py
+
+from flask import Blueprint, request, jsonify
+
+# Centralized events list and API
+
+# Global EVENTS list
+EVENTS = [
+    "cat stands and moves near X",
+    "cat looks at X",
+    "cat passed X",
+    "cat made a sound X",
+    "cat sat down",
+    "IMPORTANT: cat say MIAAAAAAAAYYYYYYYYYYYY"
+]
+
+# Blueprint for events endpoints
+events_bp = Blueprint("events_service", __name__)
+
+@events_bp.route("/api/events", methods=["GET"])
+def get_events():
+    """Return the full list of recent events."""
+    return jsonify({"events": EVENTS}), 200
+
+@events_bp.route("/api/events", methods=["POST"])
+def add_event():
+    """Append a single event to the global EVENTS list."""
+    data = request.get_json(force=True)
+    event = data.get("event", "").strip()
+    if not event:
+        return jsonify({"error": "No 'event' provided."}), 400
+    EVENTS.append(event)
+    return jsonify({"status": "ok", "events": EVENTS}), 200
+
+@events_bp.route("/api/events", methods=["PUT"])
+def replace_events():
+    """Replace the entire global EVENTS list with a new list."""
+    data = request.get_json(force=True)
+    new_events = data.get("events")
+    if not isinstance(new_events, list) or not all(isinstance(e, str) for e in new_events):
+        return jsonify({"error": "Provide 'events' as list of strings."}), 400
+    global EVENTS
+    EVENTS = new_events
+    return jsonify({"status": "replaced", "events": EVENTS}), 200

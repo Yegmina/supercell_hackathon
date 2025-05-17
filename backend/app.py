@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template, send_from_directory, jsonify, session
 from flask_jwt_extended import JWTManager
-from anim_service import anim_bp  # import the blueprint
-
+from events import events_bp
+from anim_service import anim_bp
 
 from config import config
 import os
@@ -13,6 +13,7 @@ from utils.logger import logger
 # Create the Flask app instance
 app = Flask(__name__)
 app.register_blueprint(anim_bp)
+app.register_blueprint(events_bp)
 
 @app.errorhandler(Exception)
 def handle_unknown_error(e):
