@@ -111,7 +111,6 @@ public class CatController : MonoBehaviour
                 var rb = collider.GetComponent<Rigidbody>();
                 if (rb == null)
                     continue;
-                print(rb);
 
                 Vector3 randomDirection = Random.onUnitSphere;
 
