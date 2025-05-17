@@ -13,10 +13,13 @@ from utils.logger import logger
 
 # Create the Flask app instance
 app = Flask(__name__)
-app.register_blueprint(anim_bp)
-app.register_blueprint(events_bp)
+from say_service import say_bp
 
+app.register_blueprint(events_bp)
 app.register_blueprint(states_bp)
+app.register_blueprint(anim_bp)
+app.register_blueprint(say_bp)
+
 
 
 @app.errorhandler(Exception)
