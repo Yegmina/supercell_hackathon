@@ -11,8 +11,10 @@ public enum State
     PuttingFood,
 }
 
+
 public class WitchController : MonoBehaviour
 {
+    public Animator animator;
     public PathNetwork network;
     public string currentNode;
     public State state = State.Standing;
@@ -70,6 +72,14 @@ public class WitchController : MonoBehaviour
                     transform.position = node.transform.position;
                     currentNode = node.name;
                     state = State.Standing;
+
+                    var tagged = network.children[currentNode].GetComponent<VisibleThing>();
+                    if(tagged && tagged.name.StartsWith("anim-"))
+                    {
+                        string animationName = "A_POLY_IDL_" + tagged.name.Substring(5);
+                        animator.SetTrigger(animationName);
+                    }
+
                     timeLeft = 3f;
                 }
 

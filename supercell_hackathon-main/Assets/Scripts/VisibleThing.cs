@@ -1,6 +1,5 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
 public class VisibleThing : MonoBehaviour
 {
     private Rigidbody rb;
