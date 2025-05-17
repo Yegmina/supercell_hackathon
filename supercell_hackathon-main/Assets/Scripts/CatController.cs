@@ -41,6 +41,11 @@ public class CatController : MonoBehaviour
         Cursor.visible = false;
     }
 
+    void OnMeow()
+    {
+        print("Meow :3");
+    }
+
     void Update()
     {
         var mousePitch = Input.GetAxis("Mouse Y");
@@ -66,6 +71,11 @@ public class CatController : MonoBehaviour
         if (Input.GetButtonDown("Jump"))
         {
             verticalVelocity = Mathf.Sqrt(2 * upGravity * jumpHeight);
+        }
+
+        if (Input.GetButtonDown("Meow"))
+        {
+            OnMeow();
         }
 
         if (!character.isGrounded)
