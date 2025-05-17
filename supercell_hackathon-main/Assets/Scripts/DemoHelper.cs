@@ -11,17 +11,21 @@ public class DemoHelper : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKey(KeyCode.Escape) && Input.GetKeyDown(KeyCode.Q))
+        if (Input.GetKey(KeyCode.Escape) && Input.GetKeyDown(KeyCode.H))
             witch.ForceMoveTo("A");
-        if (Input.GetKey(KeyCode.Escape) && Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKey(KeyCode.Escape) && Input.GetKeyDown(KeyCode.J))
         {
             network.FindEdge(firstDoorTrigger).enabled = true;
             witch.ForceMoveSequence("A", "E");
         }
-        if (Input.GetKey(KeyCode.Escape) && Input.GetKey(KeyCode.M))
+        if (Input.GetKey(KeyCode.Escape) && Input.GetKeyDown(KeyCode.K))
         {
             var closest = GetClosestChild(network.gameObject, controller.transform.position);
             witch.ForceMoveTo(closest.name);
+        }
+        if (Input.GetKey(KeyCode.Escape) && Input.GetKeyDown(KeyCode.L))
+        {
+            SpeechBubbleRequester.singleton.OutOfOrderRequest();
         }
 
         if (Input.GetButtonDown("Debug"))
