@@ -14,7 +14,7 @@ EVENTS = [
     "cat passed X",
     "cat made a sound X",
     "cat sat down",
-    "IMPORTANT: cat say MIAAAAAAAAYYYYYYYYYYYY"
+    "IMPORTANT: cat say MIAAAY"
 ]
 
 # Blueprint for events endpoints
