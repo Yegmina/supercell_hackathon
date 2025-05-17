@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 
 [Serializable]
 public class Edge
@@ -10,6 +11,8 @@ public class Edge
     public string end;
     public string trigger;
     public bool enabled;
+    public UnityEvent events;
+
 }
 
 [ExecuteInEditMode]
@@ -26,11 +29,6 @@ public class PathNetwork : MonoBehaviour
         singleton = this;
         foreach (Transform child in transform)
             children[child.name] = child.gameObject;
-    }
-
-    void Update()
-    {
-
     }
 
     void OnDrawGizmos()
@@ -65,19 +63,13 @@ public class PathNetwork : MonoBehaviour
             if (!edge.enabled) continue;
 
             if (edge.start == nodeName)
-            {
                 adjacentNodeNames.Add(edge.end);
-            }
             else if (edge.end == nodeName)
-            {
                 adjacentNodeNames.Add(edge.start);
-            }
         }
 
         if (adjacentNodeNames.Count == 0)
-        {
             return null;
-        }
 
         string randomAdjacentName = adjacentNodeNames[UnityEngine.Random.Range(0, adjacentNodeNames.Count)];
 
@@ -87,8 +79,15 @@ public class PathNetwork : MonoBehaviour
 
     public Edge FindEdge(string trigger)
     {
-        foreach(var edge in edges)
+        foreach (var edge in edges)
             if (edge.trigger == trigger) return edge;
+        return null;
+    }
+
+    public Edge FindEdge(string start, string end)
+    {
+        foreach (var edge in edges)
+            if (edge.start == start && edge.end == end || edge.end == start && edge.end == start) return edge;
         return null;
     }
 }
