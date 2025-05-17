@@ -108,6 +108,10 @@ public class CatController : MonoBehaviour
 
             foreach (var collider in colliders)
             {
+                var named = collider.GetComponent<VisibleThing>();
+                if (named != null)
+                    EventBuffer.PushEvent(new Event("whacks", named.name));
+
                 var rb = collider.GetComponent<Rigidbody>();
                 if (rb == null)
                     continue;

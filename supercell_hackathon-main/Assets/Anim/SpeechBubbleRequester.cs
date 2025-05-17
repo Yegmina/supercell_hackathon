@@ -55,7 +55,6 @@ public class SpeechBubbleRequester : MonoBehaviour
     {
         using (UnityWebRequest www = UnityWebRequest.Get(sayServiceUrl))
         {
-            Debug.Log("OUT OF ORDER SPEECH REQUEST");
             yield return www.SendWebRequest();
 
             if (www.result == UnityWebRequest.Result.Success)
