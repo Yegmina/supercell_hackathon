@@ -36,6 +36,10 @@ public class CatController : MonoBehaviour
     public float eyeCastEndRadius = 0;
     public float catNearRadius = 0;
 
+    public Vector2 knockOverCenter;
+    public float knockOverRadius;
+    public float knockOverForce;
+
     void Start()
     {
         character = GetComponent<CharacterController>();
@@ -95,6 +99,32 @@ public class CatController : MonoBehaviour
         {
             var targetLook = Quaternion.LookRotation(motion, Vector3.up);
             character.transform.rotation = Quaternion.RotateTowards(character.transform.rotation, targetLook, turnSpeed * Time.deltaTime);
+        }
+
+        if (Input.GetButtonDown("Knock"))
+        {
+            var havorCenter = character.transform.position + character.transform.forward * knockOverCenter.x + character.transform.up * knockOverCenter.y;
+            Collider[] colliders = Physics.OverlapSphere(havorCenter, knockOverRadius, ~eyeCastIgnoreLayers);
+
+            foreach (var collider in colliders)
+            {
+                var rb = collider.GetComponent<Rigidbody>();
+                if (rb == null)
+                    continue;
+                print(rb);
+
+                Vector3 randomDirection = Random.onUnitSphere;
+
+                var dot = Vector3.Dot(character.transform.forward, randomDirection);
+                if (dot < 0)
+                {
+                    randomDirection *= -1;
+                }
+
+                randomDirection.y = Mathf.Abs(randomDirection.y);
+
+                rb.AddForce(knockOverForce * randomDirection, ForceMode.Impulse);
+            }
         }
 
         if (Input.GetButtonDown("Debug"))
@@ -173,6 +203,10 @@ public class CatController : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
+        Gizmos.color = Color.gray;
+        var havorCenter = character.transform.position + character.transform.forward * knockOverCenter.x + character.transform.up * knockOverCenter.y;
+        Gizmos.DrawWireSphere(havorCenter, knockOverRadius);
+
         if (!showGizmos) return;
 
         var begin = character.transform.position + character.transform.forward * catEyePivot.x + character.transform.up * catEyePivot.y;
