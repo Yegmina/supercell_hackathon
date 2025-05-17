@@ -310,8 +310,9 @@ GameObject:
   m_Component:
   - component: {fileID: 146171828}
   - component: {fileID: 146171829}
+  - component: {fileID: 146171830}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Witch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -350,6 +351,21 @@ MonoBehaviour:
   state: 0
   timeLeft: 0
   moveSpeed: 6
+--- !u!114 &146171830
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 146171827}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dc2a5548ef4cf44f9d2c7ebccf312e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  witch: {fileID: 146171829}
+  network: {fileID: 1225890110}
+  firstDoorTrigger: door
 --- !u!1 &387503334
 GameObject:
   m_ObjectHideFlags: 0
@@ -968,47 +984,38 @@ MonoBehaviour:
   edges:
   - start: A
     end: B
-    weight: 0
     trigger: 
     enabled: 1
   - start: B
     end: C
-    weight: 0
     trigger: 
     enabled: 1
   - start: C
     end: A
-    weight: 1
     trigger: 
     enabled: 1
   - start: C
     end: D
-    weight: 1
     trigger: 
     enabled: 1
   - start: A
     end: D
-    weight: 1
     trigger: 
     enabled: 1
   - start: A
     end: E
-    weight: 1
     trigger: door
     enabled: 0
   - start: E
     end: F
-    weight: 1
     trigger: 
     enabled: 1
   - start: F
     end: G
-    weight: 1
     trigger: 
     enabled: 1
   - start: G
     end: E
-    weight: 1
     trigger: door
     enabled: 1
 --- !u!4 &1225890111

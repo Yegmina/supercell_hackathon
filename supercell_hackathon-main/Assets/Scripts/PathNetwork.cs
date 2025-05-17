@@ -8,7 +8,6 @@ public class Edge
 {
     public string start;
     public string end;
-    public float weight;
     public string trigger;
     public bool enabled;
 }
@@ -77,12 +76,19 @@ public class PathNetwork : MonoBehaviour
 
         if (adjacentNodeNames.Count == 0)
         {
-            return null; // No adjacent nodes found
+            return null;
         }
 
         string randomAdjacentName = adjacentNodeNames[UnityEngine.Random.Range(0, adjacentNodeNames.Count)];
 
         children.TryGetValue(randomAdjacentName, out GameObject adjacentNode);
         return adjacentNode.name;
+    }
+
+    public Edge FindEdge(string trigger)
+    {
+        foreach(var edge in edges)
+            if (edge.trigger == trigger) return edge;
+        return null;
     }
 }
