@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
@@ -5,7 +6,6 @@ using UnityEngine;
 public enum State
 {
     Standing,
-    Walking,
     Petting,
     OpeningDoor,
     PuttingFood,
@@ -14,6 +14,7 @@ public enum State
 
 public class WitchController : MonoBehaviour
 {
+    public ParticleSystem coverup;
     public Animator animator;
     public PathNetwork network;
     public string currentNode;
@@ -43,65 +44,55 @@ public class WitchController : MonoBehaviour
                 Debug.Log(newNode);
                 network.FindEdge(currentNode, newNode).events.Invoke();
                 currentNode = newNode;
-
-                state = State.Walking;
-            }
-        }
-        else if (state == State.Walking)
-        {
-            timeLeft = 2f;
-            transform.position = Vector3.MoveTowards(
-                transform.position,
-                node.transform.position,
-                moveSpeed * Time.deltaTime
-            );
-
-            Vector3 direction = (node.transform.position - transform.position).normalized;
-            if (direction != Vector3.zero)
-                transform.rotation = Quaternion.LookRotation(direction);
-
-            if (Vector3.Distance(transform.position, node.transform.position) < 0.2)
-            {
-                if (futurePath.Count > 0)
-                {
-                    currentNode = futurePath[0];
-                    futurePath.RemoveAt(0);
-                }
-                else
-                {
-                    transform.position = node.transform.position;
-                    currentNode = node.name;
-                    state = State.Standing;
-
-                    var tagged = network.children[currentNode].GetComponent<VisibleThing>();
-                    if(tagged && tagged.name.StartsWith("anim-"))
-                    {
-                        string animationName = "A_POLY_IDL_" + tagged.name.Substring(5);
-                        animator.SetTrigger(animationName);
-                    }
-
-                    timeLeft = 3f;
-                }
-
+                coverup.Play();
+                timeLeft = Random.Range(10, 15);
+                transform.position = node.transform.position;
             }
         }
     }
 
     public void ForceMoveTo(string node)
     {
-        state = State.Walking;
+        coverup.Play();
         currentNode = network.children[node].name;
+        transform.position = network.children[node].transform.position;
+    }
+
+    void DoNextFutureMove()
+    {
+        if (futurePath.Count > 0)
+        {
+            var next = futurePath[0];
+            futurePath.RemoveAt(0);
+            ForceMoveTo(next);
+            RunAfterSeconds(1f, () =>
+            {
+                DoNextFutureMove();
+            });
+        }
     }
 
     public void ForceMoveSequence(params string[] sequence)
     {
-        ForceMoveTo(sequence[0]);
         foreach (var item in sequence)
             futurePath.Add(item);
+        DoNextFutureMove();
     }
 
     public void DebugPrintSomeRandomThing()
     {
         print("AAAAAAAAAAAA this is for debug :3");
     }
+
+    IEnumerator WaitAndRun(float t, System.Action action)
+    {
+        yield return new WaitForSeconds(t);
+        action();
+    }
+
+    void RunAfterSeconds(float t, System.Action action)
+    {
+        StartCoroutine(WaitAndRun(t, action));
+    }
+
 }
