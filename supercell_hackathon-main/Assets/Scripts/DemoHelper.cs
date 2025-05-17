@@ -9,17 +9,6 @@ public class DemoHelper : MonoBehaviour
     public PathNetwork network;
     public string firstDoorTrigger;
 
-    IEnumerator WaitAndRun(float t, System.Action action)
-    {
-        yield return new WaitForSeconds(t);
-        action();
-    }
-
-    void RunAfterSeconds(float t, System.Action action)
-    {
-        StartCoroutine(WaitAndRun(t, action));
-    }
-
     void Update()
     {
         if (Input.GetKey(KeyCode.Escape) && Input.GetKeyDown(KeyCode.Q))
@@ -34,8 +23,6 @@ public class DemoHelper : MonoBehaviour
             var closest = GetClosestChild(network.gameObject, controller.transform.position);
             witch.ForceMoveTo(closest.name);
         }
-
-
 
         if (Input.GetButtonDown("Debug"))
         {

@@ -3,7 +3,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
 
-[RequireComponent(typeof(Animator))]
 public class AnimationRequester : MonoBehaviour
 {
     [Header("Backend Settings")]
@@ -13,7 +12,8 @@ public class AnimationRequester : MonoBehaviour
     [Tooltip("Interval in seconds between requests to the backend")]
     public float queryInterval = 5f;
 
-    private Animator animator;
+    public Animator animator;
+    public WitchController controller;
     private string currentTrigger;
 
     [Serializable]
@@ -21,11 +21,6 @@ public class AnimationRequester : MonoBehaviour
     {
         public string animation;
         // all_candidates is ignored by JsonUtility
-    }
-
-    private void Awake()
-    {
-        animator = GetComponent<Animator>();
     }
 
     private void Start()
@@ -72,14 +67,17 @@ public class AnimationRequester : MonoBehaviour
 
     private void PlayAnimation(string triggerName)
     {
+        controller.timeLeft += 2f;
         // Reset previous trigger so animations can retrigger properly
         if (!string.IsNullOrEmpty(currentTrigger))
         {
+            Debug.Log("A");
             animator.ResetTrigger(currentTrigger);
         }
 
         // Set the new trigger
         animator.SetTrigger(triggerName);
+        Debug.Log("B");
         currentTrigger = triggerName;
     }
 

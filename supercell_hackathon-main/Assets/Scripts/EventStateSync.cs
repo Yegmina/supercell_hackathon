@@ -44,7 +44,7 @@ public class EventStateSync : MonoBehaviour
             string escaped = JsonUtility.ToJson(new Wrapper { value = ev.ToString() });
             // JsonUtility produces {"value":"..."}, so remap
             string eventJson = escaped.Replace("value", "event");
-            Debug.Log($"[EventStateSync] POST EVENT: {eventJson}");
+            //Debug.Log($"[EventStateSync] POST EVENT: {eventJson}");
 
             var url = $"{baseUrl}/api/events";
             var req = new UnityWebRequest(url, "POST");
@@ -65,7 +65,7 @@ public class EventStateSync : MonoBehaviour
             }
             else
             {
-                Debug.Log($"[EventStateSync] Event POST response: {req.downloadHandler.text}");
+                //Debug.Log($"[EventStateSync] Event POST response: {req.downloadHandler.text}");
             }
         }
     }
@@ -81,7 +81,7 @@ public class EventStateSync : MonoBehaviour
         }
 
         string json = JsonUtility.ToJson(new StatesPayload { states = statesList });
-        Debug.Log($"[EventStateSync] PUT STATES: {json}");
+        //Debug.Log($"[EventStateSync] PUT STATES: {json}");
 
         var url = $"{baseUrl}/api/states";
         var req = new UnityWebRequest(url, "PUT");
@@ -102,7 +102,7 @@ public class EventStateSync : MonoBehaviour
         }
         else
         {
-            Debug.Log($"[EventStateSync] States response: {req.downloadHandler.text}");
+            //Debug.Log($"[EventStateSync] States response: {req.downloadHandler.text}");
         }
     }
 
