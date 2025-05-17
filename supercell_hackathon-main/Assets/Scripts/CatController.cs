@@ -52,9 +52,22 @@ public class CatController : MonoBehaviour
         print("Meow :3");
         EventBuffer.PushEvent(new Event("meow"));
     }
+    void CheckForwardObstacle()
+    {
+        RaycastHit hit;
+        Vector3 origin = character.transform.position + Vector3.up * 0.5f;
+        Vector3 direction = character.transform.forward;
+
+        if (Physics.Raycast(origin, direction, out hit, 1f, ~eyeCastIgnoreLayers))
+        {
+            Debug.Log("Blocked by: " + hit.collider.gameObject.name);
+        }
+    }
+
 
     void Update()
     {
+        CheckForwardObstacle();
         var mousePitch = Input.GetAxis("Mouse Y");
         pitch -= mousePitch;
         pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
