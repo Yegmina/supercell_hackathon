@@ -139,7 +139,7 @@ A=40%, B=30%, C=30%
         high_resp = gemini.call_model(
             high_prompt,
             system_prompt=None,
-            check_malicious_input=True,
+            check_malicious_input=False,
             image_paths=None,
             stream=False
         ).strip()
