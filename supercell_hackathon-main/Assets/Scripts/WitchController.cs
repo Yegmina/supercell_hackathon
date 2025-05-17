@@ -48,6 +48,10 @@ public class WitchController : MonoBehaviour
                 moveSpeed * Time.deltaTime
             );
 
+            Vector3 direction = (node.transform.position - transform.position).normalized;
+            if (direction != Vector3.zero)
+                transform.rotation = Quaternion.LookRotation(direction);
+
             if (Vector3.Distance(transform.position, node.transform.position) < 0.2)
             {
                 transform.position = node.transform.position;
