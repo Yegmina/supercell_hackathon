@@ -11,17 +11,21 @@ public class Event
 
     public string name = "amogus";
     public string subject = null;
+
+    public override string ToString() {
+        return name + " " + subject;
+    }
 }
 
 public static class EventBuffer
 {
     static List<Event> events = new List<Event>();
     // For deduping events
-    static Dictionary<string, List<Event>> namedEvents = new Dictionary<string, List<Event>>();
+    public static Dictionary<string, List<string>> state = new Dictionary<string, List<string>>();
 
-    public static void PushDedupedEvents(string category, List<Event> ev)
+    public static void SetState(string category, List<string> ev)
     {
-        namedEvents[category] = ev;
+        state[category] = ev;
     }
     
     public static void PushEvent(Event ev)
@@ -33,10 +37,6 @@ public static class EventBuffer
     {
         var evs = events;
         events = new List<Event>();
-        foreach (var v in namedEvents.Values)
-            foreach (var e in v)
-                evs.Add(e);
-
         return evs;
     }
 }

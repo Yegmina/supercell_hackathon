@@ -1056,7 +1056,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maximumPhysicsSteps: 1000
-  showGizmos: 0
+  showGizmos: 1
   cameraLag: 0
   orbitSpeed: 900
   speed: 10
@@ -1077,6 +1077,7 @@ MonoBehaviour:
   eyeCastStep: 1.08
   eyeCastStartRadius: 0.42
   eyeCastEndRadius: 3.54
+  catNearRadius: 0.76
 --- !u!143 &1463749274
 CharacterController:
   m_ObjectHideFlags: 0

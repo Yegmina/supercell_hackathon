@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 
 public class CatController : MonoBehaviour
@@ -33,6 +34,7 @@ public class CatController : MonoBehaviour
     public float eyeCastStep = 0;
     public float eyeCastStartRadius = 0;
     public float eyeCastEndRadius = 0;
+    public float catNearRadius = 0;
 
     void Start()
     {
@@ -45,7 +47,6 @@ public class CatController : MonoBehaviour
     {
         print("Meow :3");
         EventBuffer.PushEvent(new Event("meow"));
-        EventBuffer.PullEvents();
     }
 
     void Update()
@@ -95,13 +96,30 @@ public class CatController : MonoBehaviour
             var targetLook = Quaternion.LookRotation(motion, Vector3.up);
             character.transform.rotation = Quaternion.RotateTowards(character.transform.rotation, targetLook, turnSpeed * Time.deltaTime);
         }
-    }
 
+        if (Input.GetButtonDown("Debug"))
+        {
+            var o = "";
+            foreach (var ev in EventBuffer.PullEvents())
+                o += ev + ",";
+
+            foreach (var s in EventBuffer.state)
+            {
+                o += s.Key + ":";
+                foreach (var t in s.Value)
+                    o += t + "/";
+                o += ",";
+            }
+
+            Debug.Log(o);
+        }
+    }
     void FixedUpdate()
     {
         RaycastHit hit;
         var end = character.transform.position;
 
+        HashSet<VisibleThing> unique = new HashSet<VisibleThing>();
         if (Physics.Raycast(character.transform.position, character.transform.forward, out hit, maxEyeCastLimit, ~eyeCastIgnoreLayers))
         {
             end = character.transform.position;
@@ -109,7 +127,6 @@ public class CatController : MonoBehaviour
 
         var begin = character.transform.position + character.transform.forward * catEyePivot.x + character.transform.up * catEyePivot.y;
 
-        HashSet<VisibleThing> unique = new HashSet<VisibleThing>();
         for (float i = 0; i < maxEyeCastLimit; i++)
         {
             if (i > maximumPhysicsSteps)
@@ -130,11 +147,28 @@ public class CatController : MonoBehaviour
                     unique.Add(component);
         }
 
-        var events = new List<Event>();
+        var looksAt = new List<string>();
         foreach (var item in unique)
-            events.Add(new Event("looks-at", item.name));
+            looksAt.Add(item.name);
+        unique.Clear();
+        EventBuffer.SetState("looks-at", looksAt);
 
-        EventBuffer.PushDedupedEvents("looks-at", events);
+        for (int i = 0; i < 45; i++)
+        {
+            float t = (i / 45f) * 360f;
+            Ray ray = new Ray(character.transform.position, Quaternion.Euler(0, t, 0) * character.transform.forward);
+            if (Physics.Raycast(ray, out hit, catNearRadius, ~eyeCastIgnoreLayers))
+            {
+                for (var component = hit.transform.gameObject.GetComponent<VisibleThing>(); component; component = null)
+                    unique.Add(component);
+            }
+            Debug.DrawRay(character.transform.position, Quaternion.Euler(0, t, 0) * character.transform.forward * catNearRadius);
+        }
+
+        var near = new List<string>();
+        foreach (var item in unique)
+            near.Add(item.name);
+        EventBuffer.SetState("near", near);
     }
 
     void OnDrawGizmosSelected()
