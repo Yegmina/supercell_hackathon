@@ -875,7 +875,7 @@ MonoBehaviour:
   - start: F
     end: G
     weight: 1
-    trigger: door
+    trigger: 
     enabled: 1
   - start: G
     end: E
