@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using NUnit.Framework;
 using UnityEngine;
 
 public enum State
@@ -18,6 +20,8 @@ public class WitchController : MonoBehaviour
     public float timeLeft;
     public float moveSpeed = 2f;
 
+    public List<string> futurePath = new List<string>();
+
     void Start()
     {
         Edge edge = network.edges[0];
@@ -35,7 +39,9 @@ public class WitchController : MonoBehaviour
             {
                 var newNode = network.GetRandomAdjacentNode(currentNode);
                 Debug.Log(newNode);
+                network.FindEdge(currentNode, newNode).events.Invoke();
                 currentNode = newNode;
+
                 state = State.Walking;
             }
         }
@@ -54,11 +60,19 @@ public class WitchController : MonoBehaviour
 
             if (Vector3.Distance(transform.position, node.transform.position) < 0.2)
             {
-                transform.position = node.transform.position;
+                if (futurePath.Count > 0)
+                {
+                    currentNode = futurePath[0];
+                    futurePath.RemoveAt(0);
+                }
+                else
+                {
+                    transform.position = node.transform.position;
+                    currentNode = node.name;
+                    state = State.Standing;
+                    timeLeft = 3f;
+                }
 
-                currentNode = node.name;
-                state = State.Standing;
-                timeLeft = Random.Range(2f, 5f);
             }
         }
     }
@@ -67,5 +81,17 @@ public class WitchController : MonoBehaviour
     {
         state = State.Walking;
         currentNode = network.children[node].name;
+    }
+
+    public void ForceMoveSequence(params string[] sequence)
+    {
+        ForceMoveTo(sequence[0]);
+        foreach (var item in sequence)
+            futurePath.Add(item);
+    }
+
+    public void DebugPrintSomeRandomThing()
+    {
+        print("AAAAAAAAAAAA this is for debug :3");
     }
 }

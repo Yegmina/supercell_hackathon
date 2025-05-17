@@ -126,23 +126,6 @@ public class CatController : MonoBehaviour
                 rb.AddForce(knockOverForce * randomDirection, ForceMode.Impulse);
             }
         }
-
-        if (Input.GetButtonDown("Debug"))
-        {
-            var o = "";
-            foreach (var ev in EventBuffer.PullEvents())
-                o += ev + ",";
-
-            foreach (var s in EventBuffer.state)
-            {
-                o += s.Key + ":";
-                foreach (var t in s.Value)
-                    o += t + "/";
-                o += ",";
-            }
-
-            Debug.Log(o);
-        }
     }
     void FixedUpdate()
     {
