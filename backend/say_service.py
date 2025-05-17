@@ -34,6 +34,7 @@ Current scene states:
 Suggest the top 3 short lines this character could say, each with a percentage weight that sums to 100.
 Respond like:
 "Hello there"=50%, "What a good kitty"=30%, "My cat is nice cat, go to mommy"=20%
+ACT AS WITCH CHARACTER IN GAME! not a cat! WITCH PERSON CHARACTER !
 """
     try:
         high_resp = gemini.call_model(
