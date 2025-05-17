@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 136551476}
   - component: {fileID: 136551475}
   - component: {fileID: 136551474}
+  - component: {fileID: 136551478}
   m_Layer: 0
   m_Name: Cube (2)
   m_TagString: Untagged
@@ -227,6 +228,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &136551478
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 136551473}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e0eef3e17ca87d47bdc02a89254b724, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  name: BALLS
 --- !u!1 &357920203
 GameObject:
   m_ObjectHideFlags: 0
@@ -1046,18 +1060,18 @@ MonoBehaviour:
   cameraLag: 0
   orbitSpeed: 900
   speed: 10
-  turnSpeed: 200
+  turnSpeed: 720
   minPitch: 3
   maxPitch: 80
   cameraPivot: {fileID: 1373248143}
   camera: {fileID: 885276469}
   character: {fileID: 1463749274}
   jumpHeight: 2
-  upGravity: 9.8
-  downGravity: 14.8
+  upGravity: 15.9
+  downGravity: 20.2
   eyeCastIgnoreLayers:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 192
   catEyePivot: {x: 0.98, y: -0.21}
   maxEyeCastLimit: 15
   eyeCastStep: 1.08

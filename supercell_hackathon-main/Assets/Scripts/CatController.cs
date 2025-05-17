@@ -44,6 +44,8 @@ public class CatController : MonoBehaviour
     void OnMeow()
     {
         print("Meow :3");
+        EventBuffer.PushEvent(new Event("meow"));
+        EventBuffer.PullEvents();
     }
 
     void Update()
@@ -128,8 +130,11 @@ public class CatController : MonoBehaviour
                     unique.Add(component);
         }
 
+        var events = new List<Event>();
         foreach (var item in unique)
-            print(item);
+            events.Add(new Event("looks-at", item.name));
+
+        EventBuffer.PushDedupedEvents("looks-at", events);
     }
 
     void OnDrawGizmosSelected()
