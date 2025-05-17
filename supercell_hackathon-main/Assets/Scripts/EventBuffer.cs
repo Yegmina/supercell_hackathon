@@ -20,7 +20,6 @@ public class Event
 public static class EventBuffer
 {
     static List<Event> events = new List<Event>();
-    // For deduping events
     public static Dictionary<string, List<string>> state = new Dictionary<string, List<string>>();
 
     public static void SetState(string category, List<string> ev)
