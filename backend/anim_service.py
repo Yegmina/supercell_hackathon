@@ -7,6 +7,7 @@ import time
 import logging
 
 from utils.gemini import GeminiModel
+from events import EVENTS  # import global events
 
 # Configure module-level logger
 debug_logger = logging.getLogger("anim_service")
@@ -19,7 +20,7 @@ _EVENTS = [
     "cat passed X",
     "cat made a sound X",
     "cat sat down",
-    "cat lay down"
+    "IMPORTANT: cat say MIAAAAAAAAYYYYYYYYYYYY"
 ]
 
 # 2) Available animations
@@ -109,131 +110,89 @@ ANIMATIONS = [
     "A_POLY_IDL_WeightShift_R_Femn",
     "A_POLY_IDL_Yawn_Femn"
 ]
-
-# Utility to strip Markdown code fences
-
-def strip_code_fences(text):
-    """
-    Remove lines starting and ending with triple backticks from the LLM response.
-    """
-    lines = text.splitlines()
-    cleaned = [line for line in lines if not line.strip().startswith("```")]
-    return "\n".join(cleaned)
-
-# 3) Instantiate your Gemini client once
+# Instantiate Gemini client once
 gemini = GeminiModel()
 
-# 4) Create a Blueprint to hold our route
+# Blueprint for animation endpoints
 anim_bp = Blueprint("anim_service", __name__)
 
 
 @anim_bp.route("/api/anim/witch-idle", methods=["GET"])
 def choose_witch_idle_animation():
     """
-    1) Sends the hard-coded events to Gemini at high temperature to get a ranking
-    2) Sends that raw ranking back to Gemini at low temperature to get strict JSON
+    1) Sends EVENTS to Gemini (high-temp) for ranking
+    2) Sends that raw ranking back to Gemini (low-temp) for strict JSON
     3) Parses & validates the names, retries if necessary
     4) Randomly selects one by weight and returns it
     """
-    # --- 1) high-temp ranking prompt
+    # 1) high-temp ranking prompt
     high_prompt = f"""
 You are an animation director. Here are the recent events:
-{chr(10).join(f"- {e}" for e in _EVENTS)}
+{chr(10).join(f"- {e}" for e in EVENTS)}
 
 Available animations:
 {chr(10).join(f"- {a}" for a in ANIMATIONS)}
 
-Your goal is to always choose the 3 most fitting animations from the list below — even if the events are abstract, metaphorical, or unrelated. Choose creatively if needed, but never say "none apply". Always give 3 animations and assign percentages (summing to 100).
-Respond in plain text exactly like:
+Your goal is to always choose the 3 most fitting animations from the list — even if the events are abstract. Never say 'none apply'. Always give 3 animations and assign percentages summing to 100.
+Respond in plain text like:
 A=40%, B=30%, C=30%
-
-
-
-to test 
-curl http://127.0.0.1:5000/api/anim/witch-idle -o resp.json
-notepad resp.json
-
 """
-
-    debug_logger.debug("Sending high-temp ranking prompt to Gemini:")
-    debug_logger.debug(high_prompt)
+    debug_logger.debug("High-temp prompt to Gemini:\n%s", high_prompt)
     try:
-        high_resp = gemini.call_model(
-            high_prompt,
-            system_prompt=None,
-            check_malicious_input=True,
-            image_paths=None,
-            stream=False
-        ).strip()
-        debug_logger.debug(f"High-temp response: {high_resp}")
+        high_resp = gemini.call_model(high_prompt, system_prompt=None, check_malicious_input=True, image_paths=None, stream=False).strip()
+        debug_logger.debug("High-temp response: %s", high_resp)
     except Exception as e:
-        debug_logger.exception("LLM ranking call failed")
+        debug_logger.exception("LLM ranking failed")
         return jsonify({"error": f"LLM ranking failed: {e}", "high_raw": None}), 500
 
-    # --- 2) low-temp JSON formatting + verify loop
+    # 2) low-temp JSON formatting
     low_prompt = f"""
-Here is a raw ranking from the director:
+Here is the raw ranking:
 {high_resp}
 
-Return STRICT JSON ONLY, where keys match exactly the animation names and values are integers (no '%' sign). For example:
+Return STRICT JSON ONLY, keys matching animation names and integer values (no '%'): e.g.
 {{
-  \"A_POLY_IDL_ArmsFolded_Casual_Loop_Fem\": 40,
-  \"A_POLY_IDL_LookAround_Casual_Loop_Fem\": 30,
-  \"A_POLY_IDL_Yawn_Casual_Loop_Fem\": 30
+  "A_POLY_IDL_ArmsFolded_Casual_Loop_Femn": 40,
+  "A_POLY_IDL_Look_Down_Femn": 30,
+  "A_POLY_IDL_Yawn_Femn": 30
 }}
-If you cannot match exactly, respond with ERROR.
+If you can't match exactly, respond ERROR.
 """
-    debug_logger.debug("Sending low-temp JSON-formatting prompt to Gemini:")
-    debug_logger.debug(low_prompt)
+    debug_logger.debug("Low-temp prompt to Gemini:\n%s", low_prompt)
 
     parsed = None
-    last_low_resp = None
-    for attempt in range(1, 4):
+    last_low_raw = None
+    for attempt in range(3):
         try:
-            low_resp = gemini.call_model(
-                low_prompt,
-                system_prompt=None,
-                check_malicious_input=False
-            ).strip()
-            last_low_resp = low_resp
-            debug_logger.debug(f"Attempt {attempt} raw low-temp response: {low_resp}")
-
-            # Strip Markdown fences if present
-            cleaned = strip_code_fences(low_resp)
-            debug_logger.debug(f"Attempt {attempt} cleaned response: {cleaned}")
-
+            low_resp = gemini.call_model(low_prompt, system_prompt=None, check_malicious_input=False).strip()
+            last_low_raw = low_resp
+            # strip fences
+            cleaned = "\n".join(line for line in low_resp.splitlines() if not line.strip().startswith("```"))
+            debug_logger.debug("Low-temp cleaned (attempt %d): %s", attempt+1, cleaned)
             parsed = json.loads(cleaned)
-            # Validate keys & values
-            if (
-                isinstance(parsed, dict)
+            if (isinstance(parsed, dict)
                 and set(parsed.keys()).issubset(set(ANIMATIONS))
-                and all(isinstance(v, int) and v > 0 for v in parsed.values())
-            ):
-                debug_logger.debug("Parsed and validated JSON successfully.")
+                and all(isinstance(v, int) and v > 0 for v in parsed.values())):
                 break
-            else:
-                debug_logger.error(f"Validation failed on attempt {attempt}: {parsed}")
-                parsed = None
-        except json.JSONDecodeError:
-            debug_logger.error(f"JSON decode error on attempt {attempt}: {last_low_resp}")
             parsed = None
-        except Exception as e:
-            debug_logger.exception(f"Error during low-temp attempt {attempt}")
+        except json.JSONDecodeError:
             parsed = None
         time.sleep(0.1)
 
     if not parsed:
-        debug_logger.error("Failed to parse/validate animation probabilities after 3 attempts.")
+        debug_logger.error("Failed to parse probabilities after 3 attempts.")
         return jsonify({
             "error": "Failed to parse animation probabilities",
             "high_raw": high_resp,
-            "last_low_raw": last_low_resp
+            "last_low_raw": last_low_raw
         }), 500
 
-    # --- 3) weighted random pick
+    # 3) Weighted random selection
     names = list(parsed.keys())
     weights = [parsed[n] for n in names]
     chosen = random.choices(names, weights=weights, k=1)[0]
-    debug_logger.debug(f"Chosen animation: {chosen} (weights: {parsed})")
+    debug_logger.debug("Chosen animation: %s", chosen)
 
-    return jsonify({"animation": chosen, "all_candidates": parsed})
+    return jsonify({"animation": chosen, "all_candidates": parsed}), 200
+
+
