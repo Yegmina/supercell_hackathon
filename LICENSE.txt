@@ -1,0 +1,14 @@
+License and Copyright Notice
+(English Version)
+
+All rights reserved by "Purr-suit of Attention" team.
+No part of this repository—including but not limited to source code, documentation, images, and other resources—may be reproduced, distributed, modified, or transmitted in any form or by any means without prior written permission from the copyright holders.
+
+Permission:
+To request permission for any use of the contents of this repository, please send an email to:
+tereyehor@gmail.com
+
+Third-Party Assets:
+This repository incorporates certain Unity assets and other files which are subject to separate licensing agreements. We have obtained the necessary licenses to use these assets in our app. In github it is only for informational and demonstrational purposes. You are strictly prohibited from downloading, reproducing, or using any of these assets directly from this repository. All such assets must be obtained directly from their official sources in compliance with their respective license agreements and applicable intellectual property laws.
+
+Unauthorized use or reproduction of any materials contained herein may result in legal action under applicable laws governing copyright and intellectual property. We are not responsible if you infringe the rights of other authors included in this repository.
