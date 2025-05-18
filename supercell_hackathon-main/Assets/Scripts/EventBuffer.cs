@@ -5,7 +5,7 @@ public class Event
 {
     public Event(string name, string subject = null)
     {
-        this.name = name;
+        this.name = "Cat " + name;
         this.subject = subject;
     }
 

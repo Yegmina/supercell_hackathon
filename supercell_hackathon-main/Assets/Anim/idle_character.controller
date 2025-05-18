@@ -592,7 +592,7 @@ AnimatorStateMachine:
   m_ChildStates:
   - serializedVersion: 1
     m_State: {fileID: -1686711536344851771}
-    m_Position: {x: 500, y: 140, z: 0}
+    m_Position: {x: 308.80002, y: 269.6, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -3543386848112597307}
     m_Position: {x: 343.80002, y: 334.6, z: 0}
@@ -802,16 +802,16 @@ AnimatorStateMachine:
     m_Position: {x: 2723.8, y: 4754.6, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 6425864160497848305}
-    m_Position: {x: 2990, y: 4900, z: 0}
+    m_Position: {x: 2758.8, y: 4819.6, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -3478214810781489369}
-    m_Position: {x: 3080, y: 4780, z: 0}
+    m_Position: {x: 2793.8, y: 4884.6, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 8329166138602316362}
-    m_Position: {x: 3170, y: 4850, z: 0}
+    m_Position: {x: 2828.8, y: 4949.6, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 3854859404300076810}
-    m_Position: {x: 3110, y: 4990, z: 0}
+    m_Position: {x: 2863.8, y: 5014.6, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -1146146321358369547}
     m_Position: {x: 2898.8, y: 5079.6, z: 0}
@@ -6716,7 +6716,7 @@ AnimatorController:
     m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
-    m_DefaultBool: 1
+    m_DefaultBool: 0
     m_Controller: {fileID: 9100000}
   - m_Name: A_POLY_IDL_Bored_FootTap_Femn
     m_Type: 9

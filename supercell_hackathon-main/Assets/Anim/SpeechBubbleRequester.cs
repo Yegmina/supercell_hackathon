@@ -5,6 +5,8 @@ using TMPro;
 
 public class SpeechBubbleRequester : MonoBehaviour
 {
+    public static SpeechBubbleRequester singleton;
+
     [Tooltip("URL of the character-say endpoint")]
     public string sayServiceUrl = "http://127.0.0.1:5000/api/character-say";
 
@@ -25,6 +27,7 @@ public class SpeechBubbleRequester : MonoBehaviour
 
     private void Start()
     {
+        singleton = this;
         if (speechText == null || bubbleContainer == null)
         {
             Debug.LogError("SpeechBubbleRequester: Missing references to UI elements.");
@@ -41,6 +44,11 @@ public class SpeechBubbleRequester : MonoBehaviour
             yield return RequestAndShowSpeech();
             yield return new WaitForSeconds(pollInterval);
         }
+    }
+
+    public void OutOfOrderRequest()
+    {
+        StartCoroutine(RequestAndShowSpeech());
     }
 
     private IEnumerator RequestAndShowSpeech()
@@ -72,7 +80,6 @@ public class SpeechBubbleRequester : MonoBehaviour
         speechText.text = line;
     }
 
-    // Optional: hide after some time
     public void HideSpeech()
     {
         bubbleContainer.SetActive(false);

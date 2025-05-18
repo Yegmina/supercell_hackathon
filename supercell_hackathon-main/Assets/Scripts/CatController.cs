@@ -67,9 +67,22 @@ public class CatController : MonoBehaviour
         animator.SetTrigger("Meow");
         EventBuffer.PushEvent(new Event("meow"));
     }
+    void CheckForwardObstacle()
+    {
+        RaycastHit hit;
+        Vector3 origin = character.transform.position + Vector3.up * 0.5f;
+        Vector3 direction = character.transform.forward;
+
+        if (Physics.Raycast(origin, direction, out hit, 1f, ~eyeCastIgnoreLayers))
+        {
+            Debug.Log("Blocked by: " + hit.collider.gameObject.name);
+        }
+    }
+
 
     void Update()
     {
+        CheckForwardObstacle();
         var mousePitch = Input.GetAxis("Mouse Y");
         pitch -= mousePitch;
         pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
@@ -194,10 +207,13 @@ public class CatController : MonoBehaviour
             animator.SetTrigger("Knock");
             foreach (var collider in colliders)
             {
+                var named = collider.GetComponent<VisibleThing>();
+                if (named != null)
+                    EventBuffer.PushEvent(new Event("whacks", named.name));
+
                 var rb = collider.GetComponent<Rigidbody>();
                 if (rb == null)
                     continue;
-                print(rb);
 
                 Vector3 randomDirection = Random.onUnitSphere;
 
