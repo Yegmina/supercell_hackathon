@@ -1,10 +1,22 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static UnityEditor.Progress;
 
-
 public class CatController : MonoBehaviour
 {
+    public Animator animator;
+    [Range(1f, 20f)]
+    public float blendSmoothSpeed = 8f;
+    float currentBlend = 0f;
+    [Range(1f, 20f)] public float jumpBlendSmooth = 7f;
+    float currentJumpBlend = 0f;
+    float targetJumpBlend = 0f;
+    public float jumpSpeed = 4.5f;
+    public float gravity = 9.81f;
+    bool wasGroundedLastFrame;
+    [SerializeField] float landingHold = 0.15f;
+    Coroutine landingRoutine;
     public int maximumPhysicsSteps = 1000;
     public bool showGizmos;
     public float cameraLag;
@@ -43,6 +55,8 @@ public class CatController : MonoBehaviour
     void Start()
     {
         character = GetComponent<CharacterController>();
+        animator = GetComponent<Animator>();
+        wasGroundedLastFrame = character.isGrounded;
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -50,6 +64,7 @@ public class CatController : MonoBehaviour
     void OnMeow()
     {
         print("Meow :3");
+        animator.SetTrigger("Meow");
         EventBuffer.PushEvent(new Event("meow"));
     }
 
@@ -70,35 +85,105 @@ public class CatController : MonoBehaviour
         var ad = Input.GetAxis("Horizontal");
 
         var wish = (forward * ws + right * ad).normalized * Mathf.Clamp01(Mathf.Sqrt(ws * ws + ad * ad));
-        var motion = wish * speed;
+        var horizontalMotion = wish * speed;
+
+        bool isGrounded = character.isGrounded;
+
+        if (isGrounded && verticalVelocity < 0f)
+            verticalVelocity = -2f;
+
+        if (isGrounded && Input.GetButtonDown("Jump"))
+        {
+            verticalVelocity = Mathf.Sqrt(2f * upGravity * jumpHeight);
+            currentJumpBlend = targetJumpBlend = -1f;
+            animator.SetBool("IsJumping", true);
+            wasGroundedLastFrame = false;
+        }
+
+        if (!isGrounded)
+        {
+            if (verticalVelocity > 0f)
+                verticalVelocity -= upGravity * Time.deltaTime;
+            else
+                verticalVelocity -= downGravity * Time.deltaTime;
+        }
+
+        Vector3 motion = horizontalMotion;
+        motion.y = verticalVelocity;
         character.Move(motion * Time.deltaTime);
 
         cameraPivot.transform.position = Vector3.Lerp(cameraPivot.transform.position, character.transform.position, 1 - cameraLag);
 
-        if (Input.GetButtonDown("Jump"))
+        bool isWalking = horizontalMotion.sqrMagnitude > 0.001f;
+        animator.SetBool("IsWalking", isWalking);
+
+        float targetBlend = 0f;
+        if (isWalking)
         {
-            verticalVelocity = Mathf.Sqrt(2 * upGravity * jumpHeight);
+            float signed = Vector3.SignedAngle(
+                               character.transform.forward,
+                               horizontalMotion,
+                               Vector3.up);
+
+            targetBlend = Mathf.Clamp(signed / 90f, -1f, 1f);
+        }
+
+        currentBlend = Mathf.MoveTowards(
+                           currentBlend,
+                           targetBlend,
+                           blendSmoothSpeed * Time.deltaTime);
+
+        animator.SetFloat("Blend", currentBlend);
+
+        if (!isGrounded)
+            targetJumpBlend = 0f;
+        else
+        {
+            if (!wasGroundedLastFrame && animator.GetBool("IsJumping"))
+            {
+                targetJumpBlend = 1f;
+                if (landingRoutine != null) StopCoroutine(landingRoutine);
+                landingRoutine = StartCoroutine(LandingHold());
+            }
+        }
+
+        currentJumpBlend = Mathf.MoveTowards(currentJumpBlend,
+                                     targetJumpBlend,
+                                     jumpBlendSmooth * Time.deltaTime);
+
+        animator.SetFloat("JumpBlend", currentJumpBlend);
+        wasGroundedLastFrame = isGrounded;
+
+        if (wish.magnitude > 0.1f)
+        {
+            var flat = new Vector3(horizontalMotion.x, 0f, horizontalMotion.z);
+            var targetLook = Quaternion.LookRotation(flat, Vector3.up);
+            character.transform.rotation = Quaternion.RotateTowards(character.transform.rotation, targetLook, turnSpeed * Time.deltaTime);
         }
 
         if (Input.GetButtonDown("Meow"))
         {
             OnMeow();
         }
-
-        if (!character.isGrounded)
+        if (Input.GetButtonDown("Yawn"))
         {
-            if (verticalVelocity > 0)
-                verticalVelocity -= Time.deltaTime * upGravity;
-            else
-                verticalVelocity -= Time.deltaTime * downGravity;
+            animator.SetTrigger("Yawn");
         }
-
-        character.Move(Vector3.up * verticalVelocity * Time.deltaTime);
-
-        if (wish.magnitude > 0.1)
+        if (Input.GetButtonDown("Strech"))
         {
-            var targetLook = Quaternion.LookRotation(motion, Vector3.up);
-            character.transform.rotation = Quaternion.RotateTowards(character.transform.rotation, targetLook, turnSpeed * Time.deltaTime);
+            animator.SetTrigger("Strech");
+        }
+        if (Input.GetButtonDown("Eat"))
+        {
+            animator.SetTrigger("Eat");
+        }
+        if (Input.GetButtonDown("Sleep"))
+        {
+            animator.SetTrigger("SleepStart");
+        }
+        if (Input.GetButtonDown("Scratch"))
+        {
+            animator.SetTrigger("Scratch");
         }
 
         if (Input.GetButtonDown("Knock"))
@@ -106,6 +191,7 @@ public class CatController : MonoBehaviour
             var havorCenter = character.transform.position + character.transform.forward * knockOverCenter.x + character.transform.up * knockOverCenter.y;
             Collider[] colliders = Physics.OverlapSphere(havorCenter, knockOverRadius, ~eyeCastIgnoreLayers);
 
+            animator.SetTrigger("Knock");
             foreach (var collider in colliders)
             {
                 var rb = collider.GetComponent<Rigidbody>();
@@ -127,6 +213,14 @@ public class CatController : MonoBehaviour
             }
         }
     }
+
+    IEnumerator LandingHold()
+    {
+        yield return new WaitForSeconds(landingHold);
+        targetJumpBlend = 0f;
+        animator.SetBool("IsJumping", false);
+    }
+
     void FixedUpdate()
     {
         RaycastHit hit;
